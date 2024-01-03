@@ -9,6 +9,7 @@ export const useBasketStore = defineStore("basket", {
          let products = JSON.parse(JSON.stringify(productsStore.products))
          products.forEach((product) => (product.count = this.basket.find((p) => p.id == product.id)?.count))
          products = products.filter((product) => product.count != undefined)
+         products = products.filter((product) => product.count != 0)
          return products
       },
       totalPrice() {

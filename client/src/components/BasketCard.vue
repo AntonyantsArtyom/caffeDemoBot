@@ -1,12 +1,8 @@
 <script setup>
-import { ref } from "vue"
+import { reactive, ref, toRefs } from "vue"
 import { useBasketStore } from "../stores/basketStore"
 const props = defineProps(["image", "name", "count", "price", "id"])
-const image = ref(props.image)
-const name = ref(props.name)
-const count = ref(props.count)
-const price = ref(props.price)
-const id = ref(props.id)
+const { image, name, count, price, id } = toRefs(reactive({ ...props }))
 const basket = useBasketStore()
 const changeCount = (change) => {
    if (count.value + change < 0) return

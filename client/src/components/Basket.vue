@@ -1,13 +1,13 @@
 <script setup>
-import { ref } from "vue"
 import { useBasketStore } from "../stores/basketStore"
 import { useHoversStore } from "../stores/hoversStore"
 import BasketCard from "./BasketCard.vue"
+import { storeToRefs } from "pinia"
 const hoversStore = useHoversStore()
 const color = getComputedStyle(document.body).getPropertyValue("--button-color")
 const closeBasket = () => hoversStore.set("basket", false)
 const basket = useBasketStore()
-const products = ref(basket.products)
+const { products } = storeToRefs(basket)
 </script>
 
 <template>

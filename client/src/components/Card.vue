@@ -1,24 +1,38 @@
 <script setup>
-import { ref, watch } from "vue"
+import { reactive, toRefs, watch } from "vue"
 import { useBasketStore } from "../stores/basketStore"
 import { storeToRefs } from "pinia"
+//получение данных pinia-хранилища корзины
 const basket = useBasketStore()
+//получение пропсов, переданных из родительского компонента - родительский
+//компонент получает массив продуктов из pinia-хранилища продуктов, родительский
+//компонент - ProductPage
 const props = defineProps(["image", "name", "description", "price", "id", "count"])
-const image = ref(props.image)
-const name = ref(props.name)
-const count = ref(props.count)
-const description = ref(props.description)
-const id = ref(props.id)
+//превращение объекта props в реактивные переменные
+const { image, name, count, description, id } = toRefs(reactive({ ...props }))
+//функция для изменения количества продуктов в корзине - на вход подается значение изменения
 const changeCount = (change) => {
+   //если количество в итоге станет меньше 0 - прервать функцию
    if (count.value + change < 0) return
-   count.value += change
-   basket.changeTo(id.value, count.value)
+   //изменить значение количества продукта в массиве продуктов корзины
+   //передается id товара, для которого мы обновили значение и новое значение
+   basket.changeTo(id.value, count.value + change)
 }
+//по какой-то причине изменение количества продукта в корзине не ререндерит компонент
+//поэтому мы следим за полной ценой товаров в корзине - если она изменилась, значит
+//количество какого-то продукта изменилось
 const { totalPrice } = storeToRefs(basket)
+//через watch следим за полной ценой
+//при изменении полной цены обновляем count - через метод getCount pinia-хранилища корзины получаем
+//количество продукта в массиве корзины и присваиваем это значение count, обновление count вызывает ререндер
+//если количество продукта в компоненте и в хранилище одно и то же - значит, был изменен другой продукт
+//если разное - значит этот, в первом случае count сохранит свое значение, иначе примет значение из хранилища
 watch([totalPrice], () => (count.value = basket.getCount(id.value)))
 </script>
 
 <template>
+   <!--карточка товара - карточка с фото, названием, ценой, количеством товара в корзине и описанием продукта -->
+   <!--в карточке есть так же кнопки для изменения количества товара в корзине -->
    <div class="card">
       <h1 class="name">{{ name }}</h1>
       <img :src="image" class="image" />
@@ -126,7 +140,6 @@ watch([totalPrice], () => (count.value = basket.getCount(id.value)))
 .image {
    width: 130px;
    height: 130px;
-   background: green;
    border-radius: 22px;
    position: absolute;
    bottom: 15px;
